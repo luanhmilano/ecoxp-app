@@ -1,49 +1,104 @@
-import { Link, Stack } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
+import { Link, Stack, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-import GoogleSignInButton from '@/components/social-auth-buttons/google/google-sign-in-button';
-import { Image } from 'expo-image';
+import EmailForm from '../components/auth/email-form';
 
 export default function LoginScreen() {
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[LOGIN SCREEN] Screen focused - User navigated to login')
+      return () => {
+        console.log('[LOGIN SCREEN] Screen unfocused - User left login')
+      }
+    }, [])
+  )
+
   return (
     <>
       <Stack.Screen options={{ title: 'Login' }} />
-      <ThemedView style={styles.container}>
-        <Image style={styles.image} source={require('@/assets/supabase-logo-icon.svg')} />
-        <ThemedText type="title">Login</ThemedText>
-        <Link  href={"/(tabs)/explore" as any} style={styles.link}>
-          <ThemedText type="link">Try to navigate to home screen!</ThemedText>
-        </Link>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <ThemedView style={styles.container}>
+          <ThemedView style={styles.header}>
+            <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
+            <ThemedText style={styles.subtitle}>Sign in to your account</ThemedText>
+          </ThemedView>
 
-        <ThemedView style={styles.socialAuthButtonsContainer}>
-          <GoogleSignInButton />
+          <ThemedView style={styles.formContainer}>
+            <EmailForm />
+            
+            <Link href={"/signup" as any} style={styles.signUpLink}>
+              <ThemedText type="link">Don't have an account? Sign up</ThemedText>
+            </Link>
+          </ThemedView>
         </ThemedView>
-      </ThemedView>
+      </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    gap: 20,
+    padding: 24,
+    maxWidth: 380,
+    width: '100%',
+    alignSelf: 'center',
   },
-  socialAuthButtonsContainer: {
-    display: 'flex',
-    gap: 10,
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  image: {
-    width: 100,
-    height: 100,
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 6,
   },
-  link: {
-    marginTop: 20,
-    ...(Platform.OS === 'web' ? { textDecorationLine: 'underline' } : {}),
-  }
+  subtitle: {
+    fontSize: 15,
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+  formContainer: {
+    marginBottom: 20,
+  },
+  signUpLink: {
+    alignSelf: 'center',
+    marginTop: 12,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e7eb',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    opacity: 0.6,
+  },
+  socialContainer: {
+    marginBottom: 20,
+  },
+  debugLink: {
+    alignSelf: 'center',
+    marginTop: 16,
+  },
+  debugText: {
+    fontSize: 14,
+    opacity: 0.5,
+  },
 });

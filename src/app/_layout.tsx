@@ -3,22 +3,20 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
-import { SplashScreenController } from '@/components/splash-screen.controller'
-
-import { useAuthContext } from '@/hooks/use-auth-context'
 import { useColorScheme } from '@/hooks/use-color-scheme'
-import AuthProvider from '../providers/auth-provider'
+import { AuthProvider } from '../providers/auth-provider'
+import { useAuthenticatedApi } from '../hooks/use-authenticated-api'
 
 // Separate RootNavigator so we can access the AuthContext
 function RootNavigator() {
-  const { isLoggedIn } = useAuthContext()
+  const { isAuthenticated } = useAuthenticatedApi();
 
   return (
     <Stack>
-      <Stack.Protected guard={isLoggedIn}>
+      <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={!isLoggedIn}>
+      <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Screen name="+not-found" />
@@ -32,10 +30,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthProvider>
-        <SplashScreenController />
         <RootNavigator />
         <StatusBar style="auto" />
       </AuthProvider>
     </ThemeProvider>
   )
-}''
+}

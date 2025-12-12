@@ -23,7 +23,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.dugol.ecoxpapp"
+      "package": "com.dugol.ecoxpapp",
+      "usesCleartextTraffic": true
     },
     "web": {
       "bundler": "metro",
