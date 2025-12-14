@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Link, Stack, router } from 'expo-router';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import React, { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../providers/auth-provider';
 
 export default function SignUpScreen() {
@@ -14,12 +14,12 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert('Erro', 'As senhas não coincidem');
       return;
     }
 
@@ -31,20 +31,17 @@ export default function SignUpScreen() {
         password 
       });
       
-      // Mostra alerta de sucesso e redireciona para login
       Alert.alert(
-        'Account Created Successfully!', 
-        'Your account has been created. Please sign in to continue.',
+        'Conta criada com sucesso!', 
+        'Sua conta foi criada. Por favor, faça login para continuar.',
         [
           {
             text: 'OK',
             onPress: () => {
-              // Limpa os campos do formulário
               setName('');
               setEmail('');
               setPassword('');
               setConfirmPassword('');
-              // Redireciona para a tela de login
               router.replace('/login');
             }
           }
@@ -52,126 +49,184 @@ export default function SignUpScreen() {
       );
     } catch (error) {
       Alert.alert(
-        'Registration Failed', 
-        error instanceof Error ? error.message : 'An error occurred during registration'
+        'Falha ao criar conta', 
+        error instanceof Error ? error.message : 'Ocorreu um erro durante o registro'
       );
     }
   };
 
-  return (
-    <>
-      <Stack.Screen options={{ title: 'Sign Up' }} />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <ThemedView style={styles.container}>
-          <ThemedView style={styles.header}>
-            <ThemedText type="title" style={styles.title}>Create Account</ThemedText>
-            <ThemedText style={styles.subtitle}>Sign up to get started</ThemedText>
-          </ThemedView>
+  const logo = require('./../../assets/images/ecoxp-logo.png');
 
-          <ThemedView style={styles.formContainer}>
+  return (
+    <View style={styles.mainContainer}>
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        
+        <View style={styles.headerRoxo}>
+          <Text style={styles.textoSignup}>Cadastro</Text>
+        </View>
+
+        <View style={styles.bodyContent}>
+          <View style={styles.headerLogoArea}>
+            <Image 
+              style={styles.logo}
+              source={logo}
+            />
+            <Text style={styles.subtitle}>Crie sua conta para começar</Text>
+          </View>
+
+          <View style={styles.formContainer}>
             {error && (
-              <ThemedView style={styles.errorContainer}>
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
-              </ThemedView>
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
             )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              editable={!isLoading}
-            />
+            <View style={styles.inputWrapper}>
+              <Ionicons name="person" size={20} color="#6b1a82" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="NOME DE USUÁRIO"
+                placeholderTextColor="#6b1a82"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                editable={!isLoading}
+              />
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              editable={!isLoading}
-            />
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail" size={20} color="#6b1a82" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="EMAIL"
+                placeholderTextColor="#6b1a82"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                editable={!isLoading}
+              />
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-              editable={!isLoading}
-            />
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed" size={20} color="#6b1a82" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="SENHA"
+                placeholderTextColor="#6b1a82"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+                editable={!isLoading}
+              />
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              editable={!isLoading}
-            />
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed" size={20} color="#6b1a82" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="CONFIRMAR SENHA"
+                placeholderTextColor="#6b1a82"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                editable={!isLoading}
+              />
+            </View>
 
-            <Button
-              title={isLoading ? "Creating Account..." : "Create Account"}
+            <TouchableOpacity
+              style={[styles.createButton, isLoading && styles.buttonDisabled]}
               onPress={handleSignUp}
               disabled={isLoading}
-            />
+            >
+              <Text style={styles.createButtonText}>
+                {isLoading ? "CRIANDO CONTA..." : "CRIAR CONTA"}
+              </Text>
+            </TouchableOpacity>
 
-            <Link href="/login" style={styles.signInLink}>
-              <ThemedText type="link">Already have an account? Sign in</ThemedText>
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>ou</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <Link href="/login" asChild>
+              <TouchableOpacity style={styles.outlineButton}>
+                <Text style={styles.outlineButtonText}>JÁ TENHO CONTA</Text>
+              </TouchableOpacity>
             </Link>
-          </ThemedView>
-        </ThemedView>
+          </View>
+
+          <View style={styles.footerContainer}>
+            <Link href="/help" asChild>
+              <TouchableOpacity style={styles.helpButton}>
+                <Ionicons name="help-circle-outline" size={20} color="#6b1a82" />
+                <Text style={styles.helpText}>Precisa de Ajuda?</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+
+        </View>
+
       </ScrollView>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  container: {
+  mainContainer: {
     flex: 1,
+    backgroundColor: '#e9ffe0',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerRoxo: {
+    backgroundColor: '#6b1a82',
+    width: '65%',
+    height: 100,
+    borderBottomRightRadius: 60,
     justifyContent: 'center',
-    padding: 24,
-    maxWidth: 380,
-    width: '100%',
-    alignSelf: 'center',
+    paddingLeft: 30,
   },
-  header: {
+  textoSignup: {
+    color: '#fff',
+    fontSize: 38,
+    fontFamily: 'Belleza',
+  },
+  bodyContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  headerLogoArea: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginTop: 30,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 6,
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 15,
-    opacity: 0.7,
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
   formContainer: {
-    gap: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  signInLink: {
+    width: '100%',
+    maxWidth: 400,
     alignSelf: 'center',
-    marginTop: 12,
+    gap: 16,
   },
   errorContainer: {
     backgroundColor: '#fee2e2',
@@ -179,10 +234,104 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#fecaca',
+    marginBottom: 16,
   },
   errorText: {
     color: '#dc2626',
     fontSize: 14,
     textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#6b1a82',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 50,
+    backgroundColor: 'transparent',
+  },
+  icon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    height: '100%',
+    fontSize: 14,
+    color: '#6b1a82',
+    fontWeight: '600',
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
+  },
+  createButton: {
+    backgroundColor: '#6b1a82',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: 'Poppins-Bold',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ccc',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#666',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
+  },
+  outlineButton: {
+    borderWidth: 2,
+    borderColor: '#6b1a82',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  outlineButtonText: {
+    color: '#6b1a82',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: 'Poppins-Bold',
+  },
+  footerContainer: {
+    alignItems: 'center',
+  },
+  helpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    padding: 10,
+  },
+  helpText: {
+    color: '#6b1a82',
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+    fontFamily: 'Poppins-Bold',
   },
 });

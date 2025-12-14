@@ -1,104 +1,151 @@
-import { Link, Stack, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { Link, Stack } from 'expo-router';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 
 import EmailForm from '../components/auth/email-form';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
-  useFocusEffect(
-    useCallback(() => {
-      console.log('[LOGIN SCREEN] Screen focused - User navigated to login')
-      return () => {
-        console.log('[LOGIN SCREEN] Screen unfocused - User left login')
-      }
-    }, [])
-  )
+  const logo = require('./../../assets/images/ecoxp-logo.png');
 
   return (
-    <>
-      <Stack.Screen options={{ title: 'Login' }} />
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.container}>
-          <ThemedView style={styles.header}>
-            <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
-            <ThemedText style={styles.subtitle}>Sign in to your account</ThemedText>
-          </ThemedView>
+    <View style={styles.mainContainer}>
+      <Stack.Screen options={{ headerShown: false }} />
 
-          <ThemedView style={styles.formContainer}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        
+        <View style={styles.headerRoxo}>
+          <Text style={styles.textoLogin}>Fazer Login</Text>
+        </View>
+
+        <View style={styles.bodyContent}>
+          <View style={styles.headerLogoArea}>
+            <Image 
+              style={styles.logo}
+              source={logo}
+            />
+          </View>
+
+          <View style={styles.formContainer}>
             <EmailForm />
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>ou</Text>
+              <View style={styles.dividerLine} />
+            </View>
             
-            <Link href={"/signup" as any} style={styles.signUpLink}>
-              <ThemedText type="link">Don't have an account? Sign up</ThemedText>
+            <Link href="/signup" asChild>
+              <TouchableOpacity style={styles.outlineButton}>
+                <Text style={styles.outlineButtonText}>CADASTRE-SE</Text>
+              </TouchableOpacity>
             </Link>
-          </ThemedView>
-        </ThemedView>
+          </View>
+
+          <View style={styles.footerContainer}>
+             <Link href="/help" asChild>
+                <TouchableOpacity style={styles.helpButton}>
+                  <Ionicons name="help-circle-outline" size={20} color="#6b1a82" />
+                  <Text style={styles.helpText}>Precisa de Ajuda?</Text>
+                </TouchableOpacity>
+             </Link>
+          </View>
+
+        </View>
+
       </ScrollView>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  container: {
+  mainContainer: {
     flex: 1,
+    backgroundColor: '#e9ffe0',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerRoxo: {
+    backgroundColor: '#6b1a82',
+    width: '65%',
+    height: 100, 
+    borderBottomRightRadius: 60, 
     justifyContent: 'center',
-    padding: 24,
-    maxWidth: 380,
-    width: '100%',
-    alignSelf: 'center',
+    paddingLeft: 30,
   },
-  header: {
+  textoLogin: {
+    color: '#fff',
+    fontSize: 38,
+    fontFamily: 'Belleza',
+  },
+  bodyContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  headerLogoArea: {
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 15,
-    opacity: 0.7,
-    textAlign: 'center',
-  },
-  formContainer: {
+    marginTop: 30,
     marginBottom: 20,
   },
-  signUpLink: {
+  logo: {
+    width: 180, 
+    height: 180,
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 400,
     alignSelf: 'center',
-    marginTop: 12,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 24,
   },
-  divider: {
+  dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#ccc',
   },
   dividerText: {
-    marginHorizontal: 16,
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  outlineButton: {
+    borderWidth: 2,
+    borderColor: '#6b1a82',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  outlineButtonText: {
+    color: '#6b1a82',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: 'Poppins-Bold',
+  },
+  footerContainer: {
+    alignItems: 'center',
+  },
+  helpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    padding: 10,
+  },
+  helpText: {
+    color: '#6b1a82',
     fontSize: 14,
-    opacity: 0.6,
-  },
-  socialContainer: {
-    marginBottom: 20,
-  },
-  debugLink: {
-    alignSelf: 'center',
-    marginTop: 16,
-  },
-  debugText: {
-    fontSize: 14,
-    opacity: 0.5,
-  },
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+    fontFamily: 'Poppins-Bold',
+  }
 });
