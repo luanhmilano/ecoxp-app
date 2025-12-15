@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 // Mock de usuários para o ranking
 const USUARIOS_RANKING = [
@@ -58,9 +58,16 @@ export default function RankingScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         
-        {/* Título da seção */}
+        {/* Título da seção com mascote */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Top Eco-Warriors</Text>
+          <View style={styles.titleContainer}>
+            <Image 
+              source={require('../../../assets/images/mascote-trofeu.png')} 
+              style={styles.mascoteTrofeu}
+              resizeMode="contain"
+            />
+            <Text style={styles.sectionTitle}>Top Eco-Warriors</Text>
+          </View>
           <Text style={styles.sectionSubtitle}>Os maiores defensores do meio ambiente</Text>
         </View>
 
@@ -158,16 +165,27 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     alignItems: 'center',
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 12,
+  },
+  mascoteTrofeu: {
+    width: 60,
+    height: 100,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    fontFamily: 'Poppins-Bold',
   },
   sectionSubtitle: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
 
   // Pódio

@@ -44,7 +44,7 @@ export default function AboutUsScreen() {
       description: "18 anos."
     },
     {
-      name: "Maria Oliveira",
+      name: "Victor Leal",
       role: "Tec. Desenvolvimento de Sistemas", 
       icon: "code-working" as keyof typeof Ionicons.glyphMap,
       description: "19 anos."

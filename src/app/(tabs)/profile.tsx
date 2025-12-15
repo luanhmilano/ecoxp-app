@@ -86,9 +86,7 @@ export default function ProfileScreen() {
               <Ionicons name="calendar" size={20} color="#666" />
               <ThemedView style={styles.infoContent}>
                 <ThemedText style={styles.infoLabel}>Member since</ThemedText>
-                <ThemedText style={styles.infoValue}>
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
-                </ThemedText>
+                <ThemedText style={styles.infoValue}>Not available</ThemedText>
               </ThemedView>
             </ThemedView>
           </ThemedView>

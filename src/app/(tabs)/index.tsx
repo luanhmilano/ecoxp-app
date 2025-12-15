@@ -1,11 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const RAIO_CHECKIN = 50; // Metros para permitir check-in
 const XP_POR_COLETA = 10;
 const NIVEIS = {
   INICIANTE: { min: 0, max: 100, label: 'Iniciante' },
@@ -13,40 +10,13 @@ const NIVEIS = {
   AVANCADO: { min: 301, max: 9999, label: 'Avançado' },
 };
 
-const LIXEIRAS = [
-  { id: 1, lat: -1.4558, long: -48.4902, nome: 'Praça da República' },
-  { id: 2, lat: -1.4520, long: -48.4850, nome: 'Estação das Docas' },
-];
-
 export default function HomeScreen() {
   const router = useRouter();
 
   const [xp, setXp] = useState(40);
   const [streak, setStreak] = useState(3);
   const [nivelAtual, setNivelAtual] = useState(NIVEIS.INICIANTE);
-
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [lixeiraProxima, setLixeiraProxima] = useState<any | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permissão de localização negada');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced, // Tenta 'Balanced' ou 'Lowest' para ser mais rápido
-      });
-      
-      setLocation(location);
-      
-      // Verifica proximidade assim que pega a localização
-      verificarProximidade(location.coords);
-    })();
-  }, []);
+  const [podeCheckin, setPodeCheckin] = useState(true);
 
   useEffect(() => {
     if (xp <= NIVEIS.INICIANTE.max) setNivelAtual(NIVEIS.INICIANTE);
@@ -54,39 +24,20 @@ export default function HomeScreen() {
     else setNivelAtual(NIVEIS.AVANCADO);
   }, [xp]);
 
-  const getDistanceFromLatLonInMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371e3; // Raio da terra em metros
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-    return R * c; // Distância em metros
-  };
-
-  const verificarProximidade = (coords: { latitude: number; longitude: number }) => {
-    const lixeiraEncontrada = LIXEIRAS.find(lixeira => {
-      const distancia = getDistanceFromLatLonInMeters(
-        coords.latitude, coords.longitude,
-        lixeira.lat, lixeira.long
-      );
-      return distancia <= RAIO_CHECKIN;
-    });
-    setLixeiraProxima(lixeiraEncontrada || null);
-  };
-
   const realizarCheckIn = () => {
-    if (!lixeiraProxima) return;
-
     Alert.alert(
       "Check-in Confirmado!",
-      `Você reciclou em ${lixeiraProxima.nome} e ganhou +${XP_POR_COLETA} XP!`,
+      `Você reciclou e ganhou +${XP_POR_COLETA} XP!`,
       [{ text: "OK" }]
     );
 
     setXp(prev => prev + XP_POR_COLETA);
-    setLixeiraProxima(null); // Esconde o botão temporariamente (lógica simples)
+    setPodeCheckin(false);
+    
+    // Simula cooldown de 30 segundos
+    setTimeout(() => {
+      setPodeCheckin(true);
+    }, 30000);
   };
 
   const progressoNivel = Math.min(100, (xp / nivelAtual.max) * 100);
@@ -110,78 +61,48 @@ export default function HomeScreen() {
 
       <ScrollView style={styles.scrollContent} contentContainerStyle={{ paddingBottom: 40 }}>
         
-        {/* --- Minimapa --- */}
+        {/* --- Minimapa Mockado --- */}
         <View style={styles.mapContainer}>
           <Text style={styles.sectionTitle}>Mapa de Coleta</Text>
           <View style={styles.mapWrapper}>
-            {location ? (
-              <MapView
-                style={styles.map}
-                // Bloqueia interação para funcionar apenas como visualização "mini"
-                scrollEnabled={false} 
-                zoomEnabled={false}
-                initialRegion={{
-                  latitude: -1.4558, // Coordenadas de Belém
-                  longitude: -48.4902,
-                  latitudeDelta: 0.05, // O Zoom
-                  longitudeDelta: 0.05,
-                }}
-                // region={{
-                //   latitude: location.coords.latitude,
-                //   longitude: location.coords.longitude,
-                //   latitudeDelta: 0.01,
-                //   longitudeDelta: 0.01,
-                // }}
-                // onPress={() => router.push('/full-map')} // Futuro redirecionamento
-              >
-                {/* Marcador do Usuário */}
-                <Marker 
-                  coordinate={{ latitude: location.coords.latitude, longitude: location.coords.longitude }}
-                  title="Você está aqui"
-                >
-                   <Ionicons name="person-circle" size={30} color="#6b1a82" />
-                </Marker>
-
-                {/* Marcadores das Lixeiras */}
-                {LIXEIRAS.map(lixeira => (
-                  <Marker
-                    key={lixeira.id}
-                    coordinate={{ latitude: lixeira.lat, longitude: lixeira.long }}
-                    title={lixeira.nome}
-                  >
-                    <View style={styles.markerContainer}>
-                      <Ionicons name="trash" size={16} color="#fff" />
-                    </View>
-                  </Marker>
-                ))}
-              </MapView>
-            ) : (
-              <View style={styles.loadingMap}>
-                <ActivityIndicator color="#6b1a82" />
-                <Text style={{ marginTop: 10, color: '#666' }}>Localizando...</Text>
-              </View>
-            )}
+            <Image 
+              source={require('../../../assets/images/minimap.png')} 
+              style={styles.mapImage}
+              resizeMode="cover"
+            />
             
-            {/* Botão sobre o mapa para expandir */}
+            {/* Demo badge sobre o mapa */}
+            <View style={styles.demoBadge}>
+              <Text style={styles.demoBadgeText}>DEMO</Text>
+            </View>
+            
+            {/* Botão sobre o mapa */}
             <TouchableOpacity 
               style={styles.expandMapButton} 
-              onPress={() => Alert.alert("Navegação", "Ir para o mapa completo (Implementar Tela)")}
+              onPress={() => router.push('/map')}
             >
               <Ionicons name="expand" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* --- Botão de Ação (Aparece só se estiver perto) --- */}
-        {lixeiraProxima && (
-          <View style={styles.checkInArea}>
-            <Text style={styles.checkInInfo}>Você está perto de: {lixeiraProxima.nome}</Text>
+        {/* --- Área de Ação Mockada --- */}
+        <View style={styles.actionArea}>
+          <Text style={styles.actionTitle}>Simular Coleta</Text>
+          <Text style={styles.actionSubtitle}>Teste a funcionalidade de check-in</Text>
+          
+          {podeCheckin ? (
             <TouchableOpacity style={styles.checkInButton} onPress={realizarCheckIn}>
               <Ionicons name="checkmark-circle" size={24} color="#fff" />
               <Text style={styles.checkInText}>FAZER CHECK-IN</Text>
             </TouchableOpacity>
-          </View>
-        )}
+          ) : (
+            <View style={styles.disabledButton}>
+              <Ionicons name="time" size={24} color="#999" />
+              <Text style={styles.disabledText}>Aguarde para próxima coleta</Text>
+            </View>
+          )}
+        </View>
 
         {/* --- Evolução e Nível --- */}
         <View style={styles.progressContainer}>
@@ -189,11 +110,21 @@ export default function HomeScreen() {
           
           <View style={styles.levelCard}>
             <View style={styles.levelHeader}>
-              <Text style={styles.levelLabel}>Nível: {nivelAtual.label}</Text>
-              <Text style={styles.xpLabel}>{xp} / {nivelAtual.max} XP</Text>
+              <View style={styles.levelInfo}>
+                <Text style={styles.levelLabel}>Nível: {nivelAtual.label}</Text>
+                <Text style={styles.xpLabel}>{xp} / {nivelAtual.max} XP</Text>
+              </View>
+              
+              <View style={styles.medalhaContainer}>
+                <Image 
+                  source={require('../../../assets/images/medalha-iniciante.png')} 
+                  style={styles.medalha}
+                  resizeMode="cover"
+                />
+              </View>
             </View>
 
-            {/* Barra de Progresso Customizada */}
+            {/* Barra de Progresso */}
             <View style={styles.progressBarBackground}>
               <View style={[styles.progressBarFill, { width: `${progressoNivel}%` }]} />
             </View>
@@ -201,6 +132,31 @@ export default function HomeScreen() {
             <Text style={styles.levelFooter}>
               Faltam {nivelAtual.max - xp} XP para o próximo nível!
             </Text>
+          </View>
+        </View>
+
+        {/* --- Estatísticas Rápidas --- */}
+        <View style={styles.statsContainer}>
+          <Text style={styles.sectionTitle}>Estatísticas</Text>
+          
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Ionicons name="leaf" size={24} color="#4CAF50" />
+              <Text style={styles.statValue}>15</Text>
+              <Text style={styles.statLabel}>Coletas</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Ionicons name="planet" size={24} color="#2196F3" />
+              <Text style={styles.statValue}>2.5kg</Text>
+              <Text style={styles.statLabel}>Reciclados</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Ionicons name="trophy" size={24} color="#FF9800" />
+              <Text style={styles.statValue}>{streak}</Text>
+              <Text style={styles.statLabel}>Sequência</Text>
+            </View>
           </View>
         </View>
 
@@ -273,7 +229,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  // Mapa
+  // Mapa Mockado
   mapContainer: {
     marginBottom: 30,
   },
@@ -282,30 +238,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
+    fontFamily: 'Poppins-Bold',
   },
   mapWrapper: {
     height: 200,
     borderRadius: 16,
-    overflow: 'hidden', // Importante para arredondar cantos do mapa
+    overflow: 'hidden',
     elevation: 4,
     backgroundColor: '#ddd',
     position: 'relative',
   },
-  map: {
+  mapImage: {
     width: '100%',
     height: '100%',
   },
-  loadingMap: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  demoBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(255, 152, 0, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  markerContainer: {
-    backgroundColor: '#2E7D32',
-    padding: 5,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#fff',
+  demoBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   expandMapButton: {
     position: 'absolute',
@@ -316,20 +275,27 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  // Check-In Area
-  checkInArea: {
-    backgroundColor: '#E8F5E9',
-    padding: 15,
-    borderRadius: 12,
+  // Área de Ação
+  actionArea: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'center',
     marginBottom: 30,
-    borderWidth: 1,
-    borderColor: '#C8E6C9',
+    elevation: 2,
   },
-  checkInInfo: {
-    color: '#2E7D32',
-    marginBottom: 10,
-    fontWeight: '600',
+  actionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+    fontFamily: 'Poppins-Bold',
+  },
+  actionSubtitle: {
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
   checkInButton: {
     backgroundColor: '#43A047',
@@ -345,11 +311,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+    fontFamily: 'Poppins-Bold',
+  },
+  disabledButton: {
+    backgroundColor: '#f5f5f5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  disabledText: {
+    color: '#999',
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   // Progress Bar
   progressContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   levelCard: {
     backgroundColor: '#fff',
@@ -360,16 +343,37 @@ const styles = StyleSheet.create({
   levelHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  levelInfo: {
+    flex: 1,
   },
   levelLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#6b1a82', // Roxo do teu tema
+    color: '#6b1a82',
+    fontFamily: 'Poppins-Bold',
+    marginBottom: 4,
   },
   xpLabel: {
     fontSize: 14,
     color: '#666',
+    fontFamily: 'Poppins-Regular',
+  },
+  medalhaContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 35,
+    padding: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  medalha: {
+    width: 50,
+    height: 50,
   },
   progressBarBackground: {
     height: 12,
@@ -380,7 +384,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#6b1a82', // Roxo do teu tema
+    backgroundColor: '#6b1a82',
     borderRadius: 6,
   },
   levelFooter: {
@@ -388,5 +392,42 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     fontStyle: 'italic',
+    fontFamily: 'Poppins-Regular',
+  },
+
+  // Estatísticas
+  statsContainer: {
+    marginBottom: 20,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 5,
+    fontFamily: 'Poppins-Bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+    fontFamily: 'Poppins-Regular',
+  },
+  mascote: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
   }
 });
