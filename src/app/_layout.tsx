@@ -1,32 +1,14 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
-import { SplashScreen, Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
+import { SplashScreen, Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
 import { useColorScheme } from '@/hooks/use-color-scheme'
-import { AuthProvider } from '../providers/auth-provider'
-import { useAuthenticatedApi } from '../hooks/use-authenticated-api'
 import { useEffect } from 'react'
+import { AuthProvider } from '../providers/auth-provider'
 
-// Separate RootNavigator so we can access the AuthContext
-function RootNavigator() {
-  const { isAuthenticated } = useAuthenticatedApi();
-
-  return (
-    <Stack>
-      <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack.Protected>
-      <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-      </Stack.Protected>
-      <Stack.Screen name="+not-found" />
-    </Stack>
-  )
-}
-
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme()
 
   const [loaded, error] = useFonts({
@@ -46,11 +28,19 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <RootNavigator />
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
         <StatusBar style="auto" />
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
+
+export default RootLayoutNav;

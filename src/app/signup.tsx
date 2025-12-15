@@ -81,6 +81,11 @@ export default function SignUpScreen() {
           </View>
 
           <View style={styles.formContainer}>
+            {/* Demo note */}
+            <View style={styles.demoContainer}>
+              <Text style={styles.demoText}>Modo protótipo - Dados são simulados</Text>
+            </View>
+
             {error && (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
@@ -227,6 +232,21 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     alignSelf: 'center',
     gap: 16,
+  },
+  demoContainer: {
+    backgroundColor: '#fef3c7',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fbbf24',
+    marginBottom: 16,
+  },
+  demoText: {
+    color: '#92400e',
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Regular',
   },
   errorContainer: {
     backgroundColor: '#fee2e2',

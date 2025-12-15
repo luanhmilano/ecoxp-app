@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  ActivityIndicator, 
-  ScrollView,
-  StatusBar
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { apiService } from '../services/api';
+import { Stack, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
+// Mock user database - mesma do auth provider
+const MOCK_USERS = [
+  { id: '1', username: 'demo', email: 'demo@ecoxp.com', password: '123456' },
+  { id: '2', username: 'usuario', email: 'usuario@ecoxp.com', password: 'senha123' },
+];
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -36,11 +41,21 @@ export default function ForgotPasswordScreen() {
 
     setIsLoading(true);
 
+    // Simula delay de rede
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     try {
-      await apiService.resetPassword({
-        username: username.trim(),
-        password: newPassword
-      })
+      // Verifica se o usuário existe no mock
+      const userExists = MOCK_USERS.find(u => u.username === username.trim());
+
+      if (!userExists) {
+        Alert.alert('Erro', 'Usuário não encontrado.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Simula atualização da senha (em um app real, isso seria persistido)
+      userExists.password = newPassword;
 
       Alert.alert('Sucesso', 'Senha alterada com sucesso!', [
         { text: 'OK', onPress: () => router.back() }
@@ -67,6 +82,12 @@ export default function ForgotPasswordScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         
+        {/* Demo note */}
+        <View style={styles.demoContainer}>
+          <Text style={styles.demoTitle}>Modo protótipo:</Text>
+          <Text style={styles.demoText}>Use 'demo' ou 'usuario' como nome de usuário</Text>
+        </View>
+        
         <Text style={styles.instructionText}>
           Insira seu nome de usuário e a nova senha para redefinir o acesso.
         </Text>
@@ -82,6 +103,7 @@ export default function ForgotPasswordScreen() {
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              editable={!isLoading}
             />
           </View>
 
@@ -94,6 +116,7 @@ export default function ForgotPasswordScreen() {
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry
+              editable={!isLoading}
             />
           </View>
 
@@ -106,6 +129,7 @@ export default function ForgotPasswordScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
+              editable={!isLoading}
             />
           </View>
 
@@ -205,5 +229,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Poppins-Bold',
     letterSpacing: 1,
+  },
+  demoContainer: {
+    backgroundColor: '#fef3c7',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fbbf24',
+    marginBottom: 20,
+  },
+  demoTitle: {
+    color: '#92400e',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 4,
+    fontFamily: 'Poppins-Bold',
+  },
+  demoText: {
+    color: '#92400e',
+    fontSize: 11,
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
 });

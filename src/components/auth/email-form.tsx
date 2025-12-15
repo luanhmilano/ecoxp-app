@@ -1,10 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Text, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../providers/auth-provider';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function EmailForm() {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -24,7 +24,11 @@ export default function EmailForm() {
         password 
       });
 
-      router.replace('/(tabs)');
+      // Força o redirecionamento imediatamente após login bem-sucedido
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 100);
+      
     } catch (error) {
       Alert.alert(
         'Falha no Login', 
@@ -35,6 +39,14 @@ export default function EmailForm() {
 
   return (
     <ThemedView style={styles.container}>
+      {/* Demo credentials hint */}
+      <ThemedView style={styles.demoContainer}>
+        <ThemedText style={styles.demoTitle}>Dados para teste:</ThemedText>
+        <ThemedText style={styles.demoText}>Usuário: demo | Senha: 123456</ThemedText>
+        <ThemedText style={styles.demoText}>ou</ThemedText>
+        <ThemedText style={styles.demoText}>Email: usuario@ecoxp.com | Senha: senha123</ThemedText>
+      </ThemedView>
+
       {error && (
         <ThemedView style={styles.errorContainer}>
           <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -165,6 +177,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     textDecorationLine: 'underline',
+    fontFamily: 'Poppins-Regular',
+  },
+  demoContainer: {
+    backgroundColor: '#f0f9ff',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+    marginBottom: 16,
+  },
+  demoTitle: {
+    color: '#0369a1',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 4,
+    fontFamily: 'Poppins-Bold',
+  },
+  demoText: {
+    color: '#0369a1',
+    fontSize: 11,
+    textAlign: 'center',
     fontFamily: 'Poppins-Regular',
   },
 });
